@@ -1,30 +1,43 @@
 import React from 'react'
-import { Activity, Clock, DollarSign, Zap } from 'lucide-react'
+import { Activity, Clock, DollarSign, Zap, Settings } from 'lucide-react'
 import clsx from 'clsx'
+import { Card, Badge } from './ui'
 
-export default function AIModelCard({ model, variant = 'default', onClick }) {
+/**
+ * AIModelCard component for displaying AI model information
+ * 
+ * @param {Object} props - Component props
+ * @param {Object} props.model - Model data object
+ * @param {'default'|'compact'} [props.variant='default'] - Card style variant
+ * @param {Function} [props.onClick] - Click handler for the card
+ * @param {string} [props.className] - Additional CSS classes
+ */
+export default function AIModelCard({ model, variant = 'default', onClick, className }) {
   const isCompact = variant === 'compact'
   
+  // Determine badge variant based on status
+  const badgeVariant = model.status === 'active' ? 'success' : 'neutral'
+  
   return (
-    <div 
-      className={clsx(
-        'bg-surface rounded-lg shadow-card border border-gray-200 transition-all duration-200 hover:shadow-lg',
-        onClick && 'cursor-pointer hover:border-accent',
-        isCompact ? 'p-4' : 'p-6'
-      )}
+    <Card
+      variant={isCompact ? 'compact' : 'default'}
+      interactive={!!onClick}
       onClick={onClick}
+      className={className}
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <div className={clsx(
             'rounded-lg flex items-center justify-center',
             isCompact ? 'w-8 h-8' : 'w-12 h-12',
-            model.status === 'active' ? 'bg-green-100' : 'bg-gray-100'
+            model.status === 'active' ? 'bg-successLight' : 'bg-gray-100'
           )}>
             <Zap className={clsx(
-              model.status === 'active' ? 'text-green-600' : 'text-gray-400',
+              model.status === 'active' ? 'text-success' : 'text-gray-400',
               isCompact ? 'w-4 h-4' : 'w-6 h-6'
-            )} />
+            )} 
+            aria-hidden="true" 
+            />
           </div>
           <div className="ml-3">
             <h3 className={clsx(
@@ -41,41 +54,48 @@ export default function AIModelCard({ model, variant = 'default', onClick }) {
             </p>
           </div>
         </div>
-        <div className={clsx(
-          'px-2 py-1 rounded-full text-xs font-medium',
-          model.status === 'active' 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-gray-100 text-gray-800'
-        )}>
+        <Badge variant={badgeVariant}>
           {model.status}
-        </div>
+        </Badge>
       </div>
 
       {!isCompact && (
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <Activity className="w-4 h-4 text-textSecondary" />
+              <Activity className="w-4 h-4 text-textSecondary" aria-hidden="true" />
             </div>
-            <div className="text-sm font-medium text-textPrimary">{model.requests || 0}</div>
+            <div className="text-sm font-medium text-textPrimary">{model.requests?.toLocaleString() || 0}</div>
             <div className="text-xs text-textSecondary">Requests</div>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <Clock className="w-4 h-4 text-textSecondary" />
+              <Clock className="w-4 h-4 text-textSecondary" aria-hidden="true" />
             </div>
             <div className="text-sm font-medium text-textPrimary">{model.avgTime || '0ms'}</div>
             <div className="text-xs text-textSecondary">Avg Time</div>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">
-              <DollarSign className="w-4 h-4 text-textSecondary" />
+              <DollarSign className="w-4 h-4 text-textSecondary" aria-hidden="true" />
             </div>
-            <div className="text-sm font-medium text-textPrimary">${model.cost || '0.00'}</div>
+            <div className="text-sm font-medium text-textPrimary">${model.cost?.toFixed(2) || '0.00'}</div>
             <div className="text-xs text-textSecondary">Cost</div>
           </div>
         </div>
       )}
-    </div>
+      
+      {onClick && (
+        <div className="mt-4 pt-4 border-t border-gray-200 flex justify-end">
+          <button 
+            className="flex items-center text-xs text-textSecondary hover:text-primary transition-colors"
+            aria-label="Configure model"
+          >
+            <Settings className="w-3 h-3 mr-1" aria-hidden="true" />
+            Configure
+          </button>
+        </div>
+      )}
+    </Card>
   )
 }
